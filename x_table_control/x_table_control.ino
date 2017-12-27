@@ -1,89 +1,139 @@
-int x = A0;
-int y = A1;
+const int X_CONTROLLER_PIN = A0;
 int xPos = 0;
-int yPos = 0;
-int dirPin = 4;
-int stepPin = 3;
-int MS1 = 0;
-int MS2 = 1;
-int MS3 = 2;
+const int X_DIR_PIN = 4;
+const int X_STEP_PIN = 3;
+// NOTE: MS pins are currently unused
+const int X_MS1 = 0;
+const int X_MS2 = 1;
+const int X_MS3 = 2;
 
-int delaySpeed = 1000;
-int topSpeed = 400;
-int rampSpeed = 3;
-int stopSpeed = 8;
-int range;
-int speedSet;
-int Speed;
+// TODO: change
+const int Y_CONTROLLER_PIN = A1;
+int yPos = 0;
+const int Y_DIR_PIN = 12;
+const int Y_STEP_PIN = 11;
+const int Y_MS1 = 8;
+const int Y_MS2 = 9;
+const int Y_MS3 = 10;
+
+const int DELAY_SPEED = 1000;
+const int TOP_SPEED = 400;
+const int RAMP_SPEED = 3;
+const int STOP_SPEED = 8;
+/*int speedSet;*/
+int xSpeed = 0;
+int controllerXSpeed = 0;
+int ySpeed = 0;
+int controllerYSpeed = 0;
 // int off;
-int trigger = 0;
+/*boolean xShouldMove = false;*/
+/*boolean ySouldMove = false;*/
 
 
 void setup() {
-//  Serial.begin(9600);
-  pinMode(dirPin, OUTPUT);
-  pinMode(stepPin, OUTPUT);
-  pinMode(MS1, OUTPUT);
-  pinMode(MS2, OUTPUT);
-  pinMode(MS3, OUTPUT);
-  //pinMode(0, OUTPUT);
-  //digitalWrite(MS1, HIGH);
-  //digitalWrite(MS2, HIGH);
-  //digitalWrite(MS3, HIGH);
+  /*Serial.begin(9600);*/
+  pinMode(X_DIR_PIN, OUTPUT);
+  pinMode(X_STEP_PIN, OUTPUT);
+  pinMode(X_MS1, OUTPUT);
+  pinMode(X_MS2, OUTPUT);
+  pinMode(X_MS3, OUTPUT);
+  digitalWrite(X_MS1, LOW);
+  digitalWrite(X_MS2, LOW);
+  digitalWrite(X_MS3, LOW);
+  pinMode(Y_DIR_PIN, OUTPUT);
+  pinMode(Y_STEP_PIN, OUTPUT);
+  pinMode(Y_MS1, OUTPUT);
+  pinMode(Y_MS2, OUTPUT);
+  pinMode(Y_MS3, OUTPUT);
+
+  digitalWrite(Y_MS1, LOW);
+  digitalWrite(Y_MS2, LOW);
+  digitalWrite(Y_MS3, LOW);
 }
 
-void updateSpeed(int newSpeedSet) {
-  int off = abs(Speed - speedSet);
+int calculateNewSpeed(int currentSpeed, int newSpeed) {
+  int off = abs(currentSpeed - newSpeed);
 
-  if (off !=  0 && Speed < speedSet) {
-    Speed = Speed + rampSpeed;
-  }
-  else if (off !=  0 && Speed > speedSet) {
-    Speed = Speed - rampSpeed;
+  if (off !=  0 && currentSpeed < newSpeed) {
+    return currentSpeed + RAMP_SPEED;
+    /*Speed = Speed + RAMP_SPEED;*/
+  } else if (off !=  0 && currentSpeed > newSpeed) {
+    return currentSpeed - RAMP_SPEED;
+    /*Speed = Speed - RAMP_SPEED;*/
   }
 }
 
-void motorStep(int pin) {
-    digitalWrite(pin, HIGH);
-    delayMicroseconds(Speed);
-    digitalWrite(pin, LOW);
-    delayMicroseconds(Speed);
+void motorStep(int pin, int pinSpeed) {
+  digitalWrite(pin, HIGH);
+  delayMicroseconds(pinSpeed);
+  digitalWrite(pin, LOW);
+  delayMicroseconds(pinSpeed);
 }
 
 void loop() {
-  xPos = analogRead(x)+5;
-//  Serial.println(xPos);
+  xPos = analogRead(X_CONTROLLER_PIN) + 5;
+  yPos = analogRead(Y_CONTROLLER_PIN) + 5;
+  /*Serial.println(xPos);*/
+  /*Serial.println(yPos);*/
 
   if (xPos >= 525) {
-    digitalWrite(dirPin, HIGH);
-    trigger = 1;
-    speedSet = map(xPos, 550, 1024, delaySpeed, topSpeed);
+    digitalWrite(X_DIR_PIN, HIGH);
+    /*shouldMove = true;*/
+    controllerXSpeed = map(xPos, 550, 1024, DELAY_SPEED, TOP_SPEED);
 //    Serial.print("HIGH speedSet=");
 //    Serial.println(speedSet);
-    updateSpeed(speedSet);
-  }
-  else if (xPos <= 475) {
-    digitalWrite(dirPin, LOW);
-    trigger = 1;
-    speedSet = map(xPos, 500, 0, delaySpeed, topSpeed);
+    xSpeed = calculateNewSpeed(xSpeed, controllerXSpeed);
+  } else if (xPos <= 475) {
+    digitalWrite(X_DIR_PIN, LOW);
+    /*shouldMove = true;*/
+    controllerXSpeed = map(xPos, 500, 0, DELAY_SPEED, TOP_SPEED);
 //    Serial.print("LOW speedSet=");
 //    Serial.println(speedSet);
-    updateSpeed(speedSet);
-  }
-  else {
-    trigger = 0;
+    xSpeed = calculateNewSpeed(xSpeed, controllerXSpeed);
+  } else {
+    /* shouldMove = false; */
+    xSpeed = 0;
   }
 
-  if (trigger == 1) {
-    motorStep(stepPin);
+  if (yPos >= 550) {
+    digitalWrite(Y_DIR_PIN, HIGH);
+    /*shouldMove = true;*/
+    controllerYSpeed = map(yPos, 550, 1024, DELAY_SPEED, TOP_SPEED);
+    /*Serial.print("HIGH controllerYSpeed=");*/
+    /*Serial.println(controllerYSpeed);*/
+    ySpeed = calculateNewSpeed(ySpeed, controllerYSpeed);
+  } else if (yPos <= 475) {
+    digitalWrite(Y_DIR_PIN, LOW);
+    /*shouldMove = true;*/
+    controllerYSpeed = map(yPos, 500, 0, DELAY_SPEED, TOP_SPEED);
+    /*Serial.print("LOW controllerYSpeed=");*/
+    /*Serial.println(controllerYSpeed);*/
+    ySpeed = calculateNewSpeed(ySpeed, controllerYSpeed);
+  } else {
+    /*shouldMove = false;*/
+    ySpeed = 0;
   }
-  else {
-    if (Speed < delaySpeed) {
-      Speed = Speed + stopSpeed;
-      motorStep(stepPin);
-    }
-    else if (Speed >= delaySpeed) {
-      Speed = delaySpeed;
-    }
+
+  /*Serial.print("ySpeed=");*/
+  /*Serial.println(ySpeed);*/
+
+  // bool shouldMove = ((ySpeed > 0) || (xSpeed > 0));
+
+  if (xSpeed > 0) {
+    motorStep(X_STEP_PIN, xSpeed);
   }
+  if (ySpeed > 0) {
+    motorStep(Y_STEP_PIN, ySpeed);
+  }
+
+  // ySpeed = 0;
+  // xSpeed = 0;
+    /*if (speed < delay_speed) {*/
+      /*speed = speed + stop_speed;*/
+      /*motorstep(steppin);*/
+    /*} else if (speed >= delay_speed) {*/
+      /*speed = delay_speed;*/
+    /*}*/
+  //}
 }
+
