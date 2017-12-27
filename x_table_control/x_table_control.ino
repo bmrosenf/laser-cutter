@@ -1,7 +1,7 @@
 int x = A0;
 int y = A1;
-int xpos = 0;
-int ypos = 0;
+int xPos = 0;
+int yPos = 0;
 int dirPin = 4;
 int stepPin = 3;
 int MS1 = 0;
@@ -51,21 +51,21 @@ void motorStep(int pin) {
 }
 
 void loop() {
-  xpos = analogRead(x)+5;
-//  Serial.println(xpos);
+  xPos = analogRead(x)+5;
+//  Serial.println(xPos);
 
-  if (xpos >= 525) {
+  if (xPos >= 525) {
     digitalWrite(dirPin, HIGH);
     trigger = 1;
-    speedSet = map(xpos, 550, 1024, delaySpeed, topSpeed);
+    speedSet = map(xPos, 550, 1024, delaySpeed, topSpeed);
 //    Serial.print("HIGH speedSet=");
 //    Serial.println(speedSet);
     updateSpeed(speedSet);
   }
-  else if (xpos <= 475) {
+  else if (xPos <= 475) {
     digitalWrite(dirPin, LOW);
     trigger = 1;
-    speedSet = map(xpos, 500, 0, delaySpeed, topSpeed);
+    speedSet = map(xPos, 500, 0, delaySpeed, topSpeed);
 //    Serial.print("LOW speedSet=");
 //    Serial.println(speedSet);
     updateSpeed(speedSet);
