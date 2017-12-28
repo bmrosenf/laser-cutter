@@ -25,10 +25,12 @@ const int Y_MS3 = 10;
 const int LONGEST_PULSE_WIDTH_US = 1000;
 const int SHORTEST_PULSE_WIDTH_US = 400;
 const int RAMP_DELTA = 3;
-int xPulseWidth = 0;
+int xPulseWidth = LONGEST_PULSE_WIDTH_US;
 int controllerXPulseWidth = 0;
-int yPulseWidth = 0;
+boolean sendXPulse = false;
+int yPulseWidth = LONGEST_PULSE_WIDTH_US;
 int controllerYPulseWidth = 0;
+boolean sendYPulse = false;
 
 void setup() {
   // Serial.begin(9600);
@@ -77,33 +79,37 @@ void loop() {
   yPos = analogRead(Y_CONTROLLER_PIN) + 5;
 
   if (xPos >= 525) {
+    sendXPulse = true;
     digitalWrite(X_DIR_PIN, HIGH);
     controllerXPulseWidth = map(xPos, 550, 1024, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else if (xPos <= 475) {
+    sendXPulse = true;
     digitalWrite(X_DIR_PIN, LOW);
     controllerXPulseWidth = map(xPos, 500, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else {
-    xPulseWidth = 0;
+    sendXPulse = false;
   }
 
   if (yPos >= 550) {
+    sendYPulse = true;
     digitalWrite(Y_DIR_PIN, HIGH);
     controllerYPulseWidth = map(yPos, 550, 1024, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
   } else if (yPos <= 475) {
+    sendYPulse = true;
     digitalWrite(Y_DIR_PIN, LOW);
     controllerYPulseWidth = map(yPos, 500, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
   } else {
-    yPulseWidth = 0;
+    sendYPulse = false;    
   }
 
-  if (xPulseWidth > 0) {
+  if (sendXPulse) {
     sendMotorPulse(X_STEP_PIN, xPulseWidth);
   }
-  if (yPulseWidth > 0) {
+  if (sendYPulse) {
     sendMotorPulse(Y_STEP_PIN, yPulseWidth);
   }
 }
