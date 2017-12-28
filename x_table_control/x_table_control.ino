@@ -1,20 +1,20 @@
 const int X_CONTROLLER_PIN = A0;
 int xPos = 0;
-const int X_DIR_PIN = 4;
-const int X_STEP_PIN = 3;
+const int X_DIR_PIN = 4; //Set HIGH for forward, LOW for reverse
+const int X_STEP_PIN = 3; //PULSE to set speed
 // NOTE: MS pins are currently unused
-const int X_MS1 = 0;
-const int X_MS2 = 1;
-const int X_MS3 = 2;
+const int X_MS1 = 0; //
+const int X_MS2 = 1; //
+const int X_MS3 = 2; //
 
 // TODO: change
 const int Y_CONTROLLER_PIN = A1;
 int yPos = 0;
-const int Y_DIR_PIN = 12;
-const int Y_STEP_PIN = 11;
-const int Y_MS1 = 8;
-const int Y_MS2 = 9;
-const int Y_MS3 = 10;
+const int Y_DIR_PIN = 12; //Set HIGH for forward, LOW for reverse
+const int Y_STEP_PIN = 11; //PULSE to set speed
+const int Y_MS1 = 8; // 
+const int Y_MS2 = 9; //
+const int Y_MS3 = 10; //
 
 const int DELAY_SPEED = 1000;
 const int TOP_SPEED = 400;
