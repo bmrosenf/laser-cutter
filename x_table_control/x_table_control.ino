@@ -90,6 +90,7 @@ void loop() {
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else {
     sendXPulse = false;
+    YPulseWidth = LONGEST_PULSE_WIDTH_US;
   }
 
   if (yPos >= 550) {
@@ -103,7 +104,8 @@ void loop() {
     controllerYPulseWidth = map(yPos, 500, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
   } else {
-    sendYPulse = false;    
+    sendYPulse = false;
+    yPulseWidth = LONGEST_PULSE_WIDTH_US;
   }
 
   if (sendXPulse) {
