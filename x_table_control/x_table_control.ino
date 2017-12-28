@@ -90,7 +90,7 @@ void loop() {
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else {
     sendXPulse = false;
-    YPulseWidth = LONGEST_PULSE_WIDTH_US;
+    yPulseWidth = LONGEST_PULSE_WIDTH_US;
   }
 
   if (yPos >= 550) {
