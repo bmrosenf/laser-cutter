@@ -1,14 +1,22 @@
-const int X_CONTROLLER_PIN = A0;
+//  MS1   MS2   MS3   Microstep Resolution
+//  LOW   LOW   LOW   Full Step
+//  HIGH  LOW   LOW   Half Step
+//  LOW   HIGH  LOW   Quarter Step 
+//  HIGH  HIGH  LOW   Eighth Step
+//  HIGH  HIGH  HIGH  Sixteenth Step
+
+
+
+const int X_CONTROLLER_PIN = A0; //Analog x reading
 int xPos = 0;
 const int X_DIR_PIN = 4; //Set HIGH for forward, LOW for reverse
 const int X_STEP_PIN = 3; //PULSE to set speed
-// NOTE: MS pins are currently unused
 const int X_MS1 = 0; //
 const int X_MS2 = 1; //
 const int X_MS3 = 2; //
 
 // TODO: change
-const int Y_CONTROLLER_PIN = A1;
+const int Y_CONTROLLER_PIN = A1; //Analog y reading
 int yPos = 0;
 const int Y_DIR_PIN = 12; //Set HIGH for forward, LOW for reverse
 const int Y_STEP_PIN = 11; //PULSE to set speed
@@ -73,27 +81,37 @@ void motorStep(int pin, int pinSpeed) {
 void loop() {
   xPos = analogRead(X_CONTROLLER_PIN) + 5;
   yPos = analogRead(Y_CONTROLLER_PIN) + 5;
-  /*Serial.println(xPos);*/
-  /*Serial.println(yPos);*/
+ 
+  /*Serial.println(xPos);
+  Serial.println(yPos);*/
 
   if (xPos >= 525) {
     digitalWrite(X_DIR_PIN, HIGH);
-    /*shouldMove = true;*/
     controllerXSpeed = map(xPos, 550, 1024, DELAY_SPEED, TOP_SPEED);
-//    Serial.print("HIGH speedSet=");
-//    Serial.println(speedSet);
     xSpeed = calculateNewSpeed(xSpeed, controllerXSpeed);
-  } else if (xPos <= 475) {
+
+  /*
+  Serial.print("HIGH speedSet=");
+  Serial.println(speedSet);
+  */
+    } 
+    
+    else if (xPos <= 475) {
     digitalWrite(X_DIR_PIN, LOW);
-    /*shouldMove = true;*/
     controllerXSpeed = map(xPos, 500, 0, DELAY_SPEED, TOP_SPEED);
-//    Serial.print("LOW speedSet=");
-//    Serial.println(speedSet);
+
+  /*
+  Serial.print("LOW speedSet=");
+  Serial.println(speedSet);
+  */
+  
     xSpeed = calculateNewSpeed(xSpeed, controllerXSpeed);
-  } else {
-    /* shouldMove = false; */
+    } 
+    
+  else {
     xSpeed = 0;
   }
+
 
   if (yPos >= 550) {
     digitalWrite(Y_DIR_PIN, HIGH);
