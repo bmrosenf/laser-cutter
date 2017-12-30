@@ -94,8 +94,13 @@ void loop() {
     controllerXPulseWidth = map(xPos, XY_Low_Bound, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else {
-    sendXPulse = false;
-    xPulseWidth = LONGEST_PULSE_WIDTH_US;
+     if (xPulseWidth < LONGEST_PULSE_WIDTH_US){
+        sendXPulse = true;
+        xPulseWidth = xPulseWidth + RAMP_DELTA; 
+    } else {
+        sendXPulse = false;
+        xPulseWidth = LONGEST_PULSE_WIDTH_US;
+    }
   }
 
   if (yPos >= XY_High_Bound) {
@@ -109,8 +114,13 @@ void loop() {
     controllerYPulseWidth = map(yPos, XY_Low_Bound, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
   } else {
-    sendYPulse = false;
-    yPulseWidth = LONGEST_PULSE_WIDTH_US;
+      if (yPulseWidth < LONGEST_PULSE_WIDTH_US){
+        sendYPulse = true;
+        yPulseWidth = yPulseWidth + RAMP_DELTA; 
+    } else {
+        sendYPulse = false;
+        yPulseWidth = LONGEST_PULSE_WIDTH_US;
+    }
   }
 
   if (sendXPulse) {
