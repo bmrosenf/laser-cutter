@@ -22,9 +22,12 @@ const int Y_MS1 = 8;
 const int Y_MS2 = 9;
 const int Y_MS3 = 10;
 
-const int LONGEST_PULSE_WIDTH_US = 1000;
-const int SHORTEST_PULSE_WIDTH_US = 400;
-const int RAMP_DELTA = 3;
+const int XY_Low_Bound = 475;
+const int XY_High_Bound = 550;
+
+const int LONGEST_PULSE_WIDTH_US = 2000;
+const int SHORTEST_PULSE_WIDTH_US = 200;
+const int RAMP_DELTA = 10;
 int xPulseWidth = LONGEST_PULSE_WIDTH_US;
 int controllerXPulseWidth = 0;
 boolean sendXPulse = false;
@@ -56,6 +59,7 @@ void setup() {
 }
 
 int calculateNewPulseWidth(int currentWidth, int newWidth) {
+
   int offset = newWidth - currentWidth;
 
   if (offset > 0) {
@@ -65,6 +69,7 @@ int calculateNewPulseWidth(int currentWidth, int newWidth) {
   } else {
     return currentWidth;
   }
+
 }
 
 void sendMotorPulse(int pin, int pulseWidth) {
@@ -75,33 +80,33 @@ void sendMotorPulse(int pin, int pulseWidth) {
 }
 
 void loop() {
-  xPos = analogRead(X_CONTROLLER_PIN) + 5;
-  yPos = analogRead(Y_CONTROLLER_PIN) + 5;
+  xPos = analogRead(X_CONTROLLER_PIN);
+  yPos = analogRead(Y_CONTROLLER_PIN);
 
-  if (xPos >= 525) {
+  if (xPos >= XY_High_Bound) {
     sendXPulse = true;
     digitalWrite(X_DIR_PIN, HIGH);
-    controllerXPulseWidth = map(xPos, 550, 1024, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
+    controllerXPulseWidth = map(xPos, XY_High_Bound, 1024, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
-  } else if (xPos <= 475) {
+  } else if (xPos <= XY_Low_Bound) {
     sendXPulse = true;
     digitalWrite(X_DIR_PIN, LOW);
-    controllerXPulseWidth = map(xPos, 500, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
+    controllerXPulseWidth = map(xPos, XY_Low_Bound, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else {
     sendXPulse = false;
-    yPulseWidth = LONGEST_PULSE_WIDTH_US;
+    xPulseWidth = LONGEST_PULSE_WIDTH_US;
   }
 
-  if (yPos >= 550) {
+  if (yPos >= XY_High_Bound) {
     sendYPulse = true;
     digitalWrite(Y_DIR_PIN, HIGH);
-    controllerYPulseWidth = map(yPos, 550, 1024, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
+    controllerYPulseWidth = map(yPos, XY_High_Bound, 1024, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
-  } else if (yPos <= 475) {
+  } else if (yPos <= XY_Low_Bound) {
     sendYPulse = true;
     digitalWrite(Y_DIR_PIN, LOW);
-    controllerYPulseWidth = map(yPos, 500, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
+    controllerYPulseWidth = map(yPos, XY_Low_Bound, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
   } else {
     sendYPulse = false;
