@@ -2,11 +2,12 @@
 //  --------------------------------------
 //  LOW   LOW   LOW   Full Step
 //  HIGH  LOW   LOW   Half Step
-//  LOW   HIGH  LOW   Quarter Step 
+//  LOW   HIGH  LOW   Quarter Step
 //  HIGH  HIGH  LOW   Eighth Step
 //  HIGH  HIGH  HIGH  Sixteenth Step
 
-const int xlimitbutton = 7;
+const int X_LIMIT_BUTTON = 7;
+const int Y_LIMIT_BUTTON = 6;
 int count = 0;
 int pos = 0;
 
@@ -22,7 +23,7 @@ const int Y_CONTROLLER_PIN = A1; // Analog y reading
 int yPos = 0;
 const int Y_DIR_PIN = 12; // Set HIGH for forward, LOW for reverse
 const int Y_STEP_PIN = 11; // PULSE to set speed
-const int Y_MS1 = 8; 
+const int Y_MS1 = 8;
 const int Y_MS2 = 9;
 const int Y_MS3 = 10;
 
@@ -61,40 +62,66 @@ void setup() {
   digitalWrite(Y_MS2, LOW);
   digitalWrite(Y_MS3, LOW);
 
-//attemping to create 0 position
+  //attemping to create 0 position
 
-  pinMode(xlimitbutton, INPUT_PULLUP); 
- 
+  pinMode(X_LIMIT_BUTTON, INPUT_PULLUP);
+  pinMode(Y_LIMIT_BUTTON, INPUT_PULLUP);
+
   digitalWrite(X_DIR_PIN, LOW);
-  
-  while(digitalRead(xlimitbutton) == HIGH){
-  sendMotorPulse(X_STEP_PIN, 800);
+
+  while (digitalRead(X_LIMIT_BUTTON) == HIGH) {
+    sendMotorPulse(X_STEP_PIN, 800);
   }
 
   digitalWrite(X_DIR_PIN, HIGH);
-  delay(1000);
 
-  while(digitalRead(xlimitbutton) == LOW){
-  sendMotorPulse(X_STEP_PIN, 800);
-  count++;
+  while (digitalRead(X_LIMIT_BUTTON) == LOW) {
+    sendMotorPulse(X_STEP_PIN, 800);
+    count++;
   }
 
-  while(digitalRead(xlimitbutton) == HIGH){
-  sendMotorPulse(X_STEP_PIN, 800);
-  count++;
+  while (digitalRead(X_LIMIT_BUTTON) == HIGH) {
+    sendMotorPulse(X_STEP_PIN, 800);
+    count++;
   }
 
   digitalWrite(X_DIR_PIN, LOW);
-  delay(1000);
-  pos = count/2;
+  pos = count / 2;
   count = 0;
 
-  while(count < pos){
-  sendMotorPulse(X_STEP_PIN, 800);
-  count++;
+  while (count < pos) {
+    sendMotorPulse(X_STEP_PIN, 800);
+    count++;
   }
-   
-  
+
+  count = 0;
+
+  digitalWrite(Y_DIR_PIN, LOW);
+
+  while (digitalRead(Y_LIMIT_BUTTON) == HIGH) {
+    sendMotorPulse(Y_STEP_PIN, 800);
+  }
+
+  digitalWrite(Y_DIR_PIN, HIGH);
+
+  while (digitalRead(Y_LIMIT_BUTTON) == LOW) {
+    sendMotorPulse(Y_STEP_PIN, 800);
+    count++;
+  }
+
+  while (digitalRead(Y_LIMIT_BUTTON) == HIGH) {
+    sendMotorPulse(Y_STEP_PIN, 800);
+    count++;
+  }
+
+  digitalWrite(Y_DIR_PIN, LOW);
+  pos = count / 2;
+  count = 0;
+
+  while (count < pos) {
+    sendMotorPulse(Y_STEP_PIN, 800);
+    count++;
+  }
 }
 
 int calculateNewPulseWidth(int currentWidth, int newWidth) {
@@ -121,12 +148,12 @@ void sendMotorPulse(int pin, int pulseWidth) {
 void send2MotorPulse(int pin1, int pin2, int pulseWidth1, int pulseWidth2) {
   digitalWrite(pin1, HIGH);
   digitalWrite(pin2, HIGH);
-  delayMicroseconds(pulseWidth1 /2);
-  delayMicroseconds(pulseWidth2 /2);
+  delayMicroseconds(pulseWidth1 / 2);
+  delayMicroseconds(pulseWidth2 / 2);
   digitalWrite(pin1, LOW);
   digitalWrite(pin2, LOW);
-  delayMicroseconds(pulseWidth1 /2);
-  delayMicroseconds(pulseWidth2 /2);
+  delayMicroseconds(pulseWidth1 / 2);
+  delayMicroseconds(pulseWidth2 / 2);
 }
 
 void loop() {
@@ -145,12 +172,12 @@ void loop() {
     controllerXPulseWidth = map(xPos, XY_Low_Bound, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     xPulseWidth = calculateNewPulseWidth(xPulseWidth, controllerXPulseWidth);
   } else {
-     if (xPulseWidth < LONGEST_PULSE_WIDTH_US){
-        sendXPulse = true;
-        xPulseWidth = xPulseWidth + RAMP_DELTA; 
-    } else { 
-        sendXPulse = false;
-        xPulseWidth = LONGEST_PULSE_WIDTH_US;
+    if (xPulseWidth < LONGEST_PULSE_WIDTH_US) {
+      sendXPulse = true;
+      xPulseWidth = xPulseWidth + RAMP_DELTA;
+    } else {
+      sendXPulse = false;
+      xPulseWidth = LONGEST_PULSE_WIDTH_US;
     }
   }
 
@@ -165,12 +192,12 @@ void loop() {
     controllerYPulseWidth = map(yPos, XY_Low_Bound, 0, LONGEST_PULSE_WIDTH_US, SHORTEST_PULSE_WIDTH_US);
     yPulseWidth = calculateNewPulseWidth(yPulseWidth, controllerYPulseWidth);
   } else {
-      if (yPulseWidth < LONGEST_PULSE_WIDTH_US){
-        sendYPulse = true;
-        yPulseWidth = yPulseWidth + RAMP_DELTA; 
+    if (yPulseWidth < LONGEST_PULSE_WIDTH_US) {
+      sendYPulse = true;
+      yPulseWidth = yPulseWidth + RAMP_DELTA;
     } else {
-        sendYPulse = false;
-        yPulseWidth = LONGEST_PULSE_WIDTH_US;
+      sendYPulse = false;
+      yPulseWidth = LONGEST_PULSE_WIDTH_US;
     }
   }
 
