@@ -39,7 +39,7 @@ boolean sendXPulse = false;
 int yPulseWidth = LONGEST_PULSE_WIDTH_US;
 int controllerYPulseWidth = 0;
 boolean sendYPulse = false;
-long time = micros();
+//long time = micros();
 
 void setup() {
   //Serial.begin(9600);
@@ -87,7 +87,6 @@ void setup() {
   }
 
   digitalWrite(X_DIR_PIN, LOW);
-  delay(1000);
   pos = count / 2;
   count = 0;
 
@@ -150,13 +149,17 @@ void updateMotorPins(boolean sendX, boolean sendY) {
     return;
   }
 
-  time = micros();
+  //time = micros();
 
-  int xPulsePos = time % (xPulseWidth * 2);
-  int yPulsePos = time % (yPulseWidth * 2);
+  int roundedXPulseWidth = (xPulseWidth / 100) * 100;
+  int roundedYPulseWidth = (yPulseWidth / 100) * 100;
+
+  int xPulsePos = ((micros() % (roundedXPulseWidth * 2)) / 10) * 10;
+  int yPulsePos = ((micros() % (roundedYPulseWidth * 2)) / 10) * 10;
 
   if (sendX) {
-    if (xPulsePos <= xPulseWidth) {
+    delayMicroseconds(micros() % 10);
+    if (xPulsePos <= roundedXPulseWidth) {
       digitalWrite(X_STEP_PIN, HIGH);
     } else {
       digitalWrite(X_STEP_PIN, LOW);
@@ -164,7 +167,8 @@ void updateMotorPins(boolean sendX, boolean sendY) {
   }
 
   if (sendY) {
-    if (yPulsePos <= yPulseWidth) {
+    delayMicroseconds(micros() % 10);
+    if (yPulsePos <= roundedYPulseWidth) {
       digitalWrite(Y_STEP_PIN, HIGH);
     } else {
       digitalWrite(Y_STEP_PIN, LOW);
