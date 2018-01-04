@@ -39,6 +39,7 @@ boolean sendXPulse = false;
 int yPulseWidth = LONGEST_PULSE_WIDTH_US;
 int controllerYPulseWidth = 0;
 boolean sendYPulse = false;
+long time = micros();
 
 void setup() {
   //Serial.begin(9600);
@@ -86,6 +87,7 @@ void setup() {
   }
 
   digitalWrite(X_DIR_PIN, LOW);
+  delay(1000);
   pos = count / 2;
   count = 0;
 
@@ -125,7 +127,6 @@ void setup() {
 }
 
 int calculateNewPulseWidth(int currentWidth, int newWidth) {
-
   int offset = newWidth - currentWidth;
 
   if (offset > 0) {
@@ -135,7 +136,6 @@ int calculateNewPulseWidth(int currentWidth, int newWidth) {
   } else {
     return currentWidth;
   }
-
 }
 
 void sendMotorPulse(int pin, int pulseWidth) {
@@ -145,15 +145,31 @@ void sendMotorPulse(int pin, int pulseWidth) {
   delayMicroseconds(pulseWidth);
 }
 
-void send2MotorPulse(int pin1, int pin2, int pulseWidth1, int pulseWidth2) {
-  digitalWrite(pin1, HIGH);
-  digitalWrite(pin2, HIGH);
-  delayMicroseconds(pulseWidth1 / 2);
-  delayMicroseconds(pulseWidth2 / 2);
-  digitalWrite(pin1, LOW);
-  digitalWrite(pin2, LOW);
-  delayMicroseconds(pulseWidth1 / 2);
-  delayMicroseconds(pulseWidth2 / 2);
+void updateMotorPins(boolean sendX, boolean sendY) {
+  if (!(sendX || sendY)) {
+    return;
+  }
+
+  time = micros();
+
+  int xPulsePos = time % (xPulseWidth * 2);
+  int yPulsePos = time % (yPulseWidth * 2);
+
+  if (sendX) {
+    if (xPulsePos <= xPulseWidth) {
+      digitalWrite(X_STEP_PIN, HIGH);
+    } else {
+      digitalWrite(X_STEP_PIN, LOW);
+    }
+  }
+
+  if (sendY) {
+    if (yPulsePos <= yPulseWidth) {
+      digitalWrite(Y_STEP_PIN, HIGH);
+    } else {
+      digitalWrite(Y_STEP_PIN, LOW);
+    }
+  }
 }
 
 void loop() {
@@ -201,14 +217,6 @@ void loop() {
     }
   }
 
-  if (sendXPulse == true && sendYPulse == false) {
-    sendMotorPulse(X_STEP_PIN, xPulseWidth);
-  }
-  if (sendYPulse == true && sendXPulse == false) {
-    sendMotorPulse(Y_STEP_PIN, yPulseWidth);
-  }
-  if (sendYPulse == true && sendXPulse == true) {
-    send2MotorPulse(X_STEP_PIN, Y_STEP_PIN, xPulseWidth, yPulseWidth);
-  }
+  updateMotorPins(sendXPulse, sendYPulse);
 }
 
