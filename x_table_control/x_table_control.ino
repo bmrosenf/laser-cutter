@@ -6,6 +6,10 @@
 //  HIGH  HIGH  LOW   Eighth Step
 //  HIGH  HIGH  HIGH  Sixteenth Step
 
+const int xlimitbutton = 7;
+int count = 0;
+int pos = 0;
+
 const int X_CONTROLLER_PIN = A0; // Analog x reading
 int xPos = 0;
 const int X_DIR_PIN = 4; // Set HIGH for forward, LOW for reverse
@@ -26,8 +30,8 @@ const int XY_Low_Bound = 475;
 const int XY_High_Bound = 550;
 
 const int LONGEST_PULSE_WIDTH_US = 2000;
-const int SHORTEST_PULSE_WIDTH_US = 200;
-const int RAMP_DELTA = 10;
+const int SHORTEST_PULSE_WIDTH_US = 1000;
+const int RAMP_DELTA = 100;
 int xPulseWidth = LONGEST_PULSE_WIDTH_US;
 int controllerXPulseWidth = 0;
 boolean sendXPulse = false;
@@ -36,7 +40,7 @@ int controllerYPulseWidth = 0;
 boolean sendYPulse = false;
 
 void setup() {
-  // Serial.begin(9600);
+  //Serial.begin(9600);
   pinMode(X_DIR_PIN, OUTPUT);
   pinMode(X_STEP_PIN, OUTPUT);
   pinMode(X_MS1, OUTPUT);
@@ -56,6 +60,41 @@ void setup() {
   digitalWrite(Y_MS1, LOW);
   digitalWrite(Y_MS2, LOW);
   digitalWrite(Y_MS3, LOW);
+
+//attemping to create 0 position
+
+  pinMode(xlimitbutton, INPUT_PULLUP); 
+ 
+  digitalWrite(X_DIR_PIN, LOW);
+  
+  while(digitalRead(xlimitbutton) == HIGH){
+  sendMotorPulse(X_STEP_PIN, 800);
+  }
+
+  digitalWrite(X_DIR_PIN, HIGH);
+  delay(1000);
+
+  while(digitalRead(xlimitbutton) == LOW){
+  sendMotorPulse(X_STEP_PIN, 800);
+  count++;
+  }
+
+  while(digitalRead(xlimitbutton) == HIGH){
+  sendMotorPulse(X_STEP_PIN, 800);
+  count++;
+  }
+
+  digitalWrite(X_DIR_PIN, LOW);
+  delay(1000);
+  pos = count/2;
+  count = 0;
+
+  while(count < pos){
+  sendMotorPulse(X_STEP_PIN, 800);
+  count++;
+  }
+   
+  
 }
 
 int calculateNewPulseWidth(int currentWidth, int newWidth) {
@@ -79,7 +118,19 @@ void sendMotorPulse(int pin, int pulseWidth) {
   delayMicroseconds(pulseWidth);
 }
 
+void send2MotorPulse(int pin1, int pin2, int pulseWidth1, int pulseWidth2) {
+  digitalWrite(pin1, HIGH);
+  digitalWrite(pin2, HIGH);
+  delayMicroseconds(pulseWidth1 /2);
+  delayMicroseconds(pulseWidth2 /2);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, LOW);
+  delayMicroseconds(pulseWidth1 /2);
+  delayMicroseconds(pulseWidth2 /2);
+}
+
 void loop() {
+
   xPos = analogRead(X_CONTROLLER_PIN);
   yPos = analogRead(Y_CONTROLLER_PIN);
 
@@ -97,7 +148,7 @@ void loop() {
      if (xPulseWidth < LONGEST_PULSE_WIDTH_US){
         sendXPulse = true;
         xPulseWidth = xPulseWidth + RAMP_DELTA; 
-    } else {
+    } else { 
         sendXPulse = false;
         xPulseWidth = LONGEST_PULSE_WIDTH_US;
     }
@@ -123,11 +174,14 @@ void loop() {
     }
   }
 
-  if (sendXPulse) {
+  if (sendXPulse == true && sendYPulse == false) {
     sendMotorPulse(X_STEP_PIN, xPulseWidth);
   }
-  if (sendYPulse) {
+  if (sendYPulse == true && sendXPulse == false) {
     sendMotorPulse(Y_STEP_PIN, yPulseWidth);
+  }
+  if (sendYPulse == true && sendXPulse == true) {
+    send2MotorPulse(X_STEP_PIN, Y_STEP_PIN, xPulseWidth, yPulseWidth);
   }
 }
 
